@@ -1,15 +1,12 @@
-/*
-This example adds lights and uses a 'phong' material which responds to those lights.
-
-It also adds a shadow.  Note that the shadow parameters need to be updated on the renderer, on the light, and on the objects casting and receiving shadows.
-*/
 import * as THREE from "three";
-
-let frameCount = 0;
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // create a scene in which all other objects will exist
 let scene = new THREE.Scene();
 scene.background = new THREE.Color("rgb(9, 35, 30)");
+
+let frameCount = 0;
 
 // create a camera and position it in space
 let aspect = window.innerWidth / window.innerHeight;
@@ -26,32 +23,24 @@ document.body.appendChild(renderer.domElement);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
+// // add orbit controls
+let controls = new OrbitControls(camera, renderer.domElement);
+
 //texture
 let textureLoader = new THREE.TextureLoader();
-let myFlowerTexture = textureLoader.load("driedLeaf.jpg");
-
-// change the texture parameters if you like!
-myFlowerTexture.wrapS = THREE.RepeatWrapping;
-myFlowerTexture.wrapT = THREE.RepeatWrapping;
-myFlowerTexture.repeat.set(1, 1);
 
 // create a sphere
 let geometry = new THREE.SphereGeometry(1, 100, 100);
-let material = new THREE.MeshPhongMaterial({ color: "blue" });
-let my3DObject = new THREE.Mesh(geometry, material);
-my3DObject.castShadow = true;
-// and add it to the scene
-//scene.add(my3DObject);
 
 //create leaf spheres
-const leafColor = new THREE.Color("rgb(141, 193, 174)");
-let leafMat = new THREE.MeshPhysicalMaterial({
-  color: "rgb(141, 193, 174)",
-  roughness: 0,
-  transmission:0.5,
-  sheen: 1,
-}
-)
+let sphereMap = new THREE.TextureLoader().load("Alien_Flesh_001_color.jpg");
+let sphereDMap = new THREE.TextureLoader().load("Alien_Flesh_001_disp.jpg");
+
+let leafMat = new THREE.MeshPhongMaterial({
+  displacementMap: sphereDMap,
+  displacementScale: 4,
+  map: sphereMap
+});
 
 const spheres = [];
 
@@ -67,15 +56,14 @@ for ( let i = 0; i < 800; i ++ ) {
 }
 
 // //create sky
-// // const skyColor = new THREE.Color("rgb(141, 193, 174)");
-const skyColor = new THREE.Color("rgb(141, 193, 174)");
-let skyMat = new THREE.MeshPhysicalMaterial({
-  color: "rgb(101, 149, 132)",
-  roughness: 0,
-  transmission:0.8,
-  sheen: 0,
-}
-)
+let skyMap = new THREE.TextureLoader().load("Alien_Flesh_001_color.jpg");
+let skyDMap = new THREE.TextureLoader().load("aerial_rocks_02_disp_4k.png");
+
+let skyMat = new THREE.MeshPhongMaterial({
+  displacementMap: skyDMap,
+  displacementScale: 3,
+  map: skyMap
+});
 
 //let skyGeo = new THREE.CircleGeometry( 2, 32 );
 let skyGeo = new THREE.IcosahedronGeometry(1 , 0);
@@ -94,11 +82,24 @@ for ( let i = 0; i < 800; i ++ ) {
 
 // floor
 let floorGeo = new THREE.BoxGeometry(200, 1, 100);
-let floorMat = new THREE.MeshPhongMaterial({ map: myFlowerTexture });
-let floorMesh = new THREE.Mesh(floorGeo, floorMat);
+let floorMesh = new THREE.Mesh(floorGeo,leafMat);
 floorMesh.position.set(0, -2, -50);
 floorMesh.receiveShadow = true;
 scene.add(floorMesh);
+
+//load 3D model pomegranate
+let pomGroup = new THREE.Group();
+pomGroup.position.set(0,0,0);
+
+let loader = new GLTFLoader();
+loader.load( 'food_pomegranate_01_4k.gltf',
+ ( object ) => {
+  console.log(object)
+  object.scene.scale.set(1,1,1);
+  object.scene.position.set(2,0,100);
+  pomGroup.add(object.scene);
+	scene.add(pomGroup);
+})
 
 //add a light
 let myColor = new THREE.Color(0xffaabb);
@@ -132,24 +133,11 @@ myDirectionalLight2.shadow.camera.far = 500; // default
 
 
 function loop() {
-  // add some movement
-  frameCount++;
-
-  // add some movement to the  bird using a sine wave
-  for (i=0; i<spheres.length; i++){
-    spheres[i].position.set(0, 0, Math.sin(frameCount / 100) * 10);
-  }
-
-  // for ( let i = 0, il = spheres.length; i < il; i ++ ) {
-
-  //   const sphere = spheres[ i ];
-
-  //   sphere.position.x = 5 * Math.cos( timer + i );
-  //   sphere.position.y = 5 * Math.sin( timer + i * 1.1 );
-
+  // frameCount++
+  // // add some movement
+  // for (let i=0; i<spheres.length; i++){
+  //   spheres[i].position.set(0, 0, Math.sin(frameCount / 100) * 10);
   // }
-  //bird.position.set(0, 0, Math.sin(frameCount / 100) * 10);
-  
   // finally, take a picture of the scene and show it in the <canvas>
   renderer.render(scene, camera);
 
