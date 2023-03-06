@@ -28,11 +28,12 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 // orbit controls
 let controls = new OrbitControls(camera, renderer.domElement);
 controls.minDistance = 0;
-controls.maxDistance = 500;
+controls.maxDistance = 250;
+controls.maxPolarAngle = Math.PI/2;
 
-// axes helper
-const axesHelper = new THREE.AxesHelper( 100);
-scene.add( axesHelper );
+// axes helper, comment out when done
+// const axesHelper = new THREE.AxesHelper( 100);
+// scene.add( axesHelper );
 
 // floor
 //const redLightColor = new THREE.Color("rgb(102, 18, 18)");
@@ -67,28 +68,10 @@ let sphereMat = new THREE.MeshStandardMaterial({
 let sphereGeo = new THREE.SphereGeometry(5, 32, 32 );
 const sphereMesh = new THREE.Mesh(sphereGeo,sphereMat);
 sphereMesh.castShadow = true;
-sphereMesh.position.set(-250,20,-100);
+sphereMesh.position.set(-200,20,-100);
 scene.add(sphereMesh);
 
-// //fog
-// let cloudGeo = new THREE.PlaneGeometry(500, 500);
-// let cloudTexture = new THREE.TextureLoader().load("./assets/fog2.png")
-// let cloudMaterial = new THREE.MeshBasicMaterial({
-//   color: 0x0084ff,
-//   map: cloudTexture,
-//   transparent: true,
-//   opacity: 0.09
-//   });
-// for (let i = 0; i < 10; i++) {
-//   let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
-//   cloud.position.set(0,0);
-//   cloud.rotation.x = 1;
-//   cloud.rotation.y = 0;
-//   cloud.rotation.z = Math.random() *100;
-//   scene.add(cloud);
-// }
-
-//* //skybox
+//skybox
 let materialArray = [];
 let texture_ft = new THREE.TextureLoader().load( './assets/fog.png');
 let texture_bk = new THREE.TextureLoader().load( './assets/fog.png');
@@ -130,7 +113,8 @@ function addSpatialAudio() {
   const audioLoader2 = new THREE.AudioLoader();
   audioLoader2.load( './assets/hospitalBeeps.mp3', function( buffer ) {
     localAudio.setBuffer( buffer );
-    localAudio.setRefDistance(15);
+    localAudio.setVolume(1);
+    localAudio.setRefDistance(25);
     localAudio.play();
   });
   sphereMesh.add(localAudio);
@@ -142,7 +126,7 @@ function addSpatialAudio() {
   const audioLoader3 = new THREE.AudioLoader();
   audioLoader3.load( './assets/hospitalBackground.mp3', function( buffer ) {
     localAudioBustle.setBuffer(buffer);
-    localAudioBustle.setRefDistance(40);
+    localAudioBustle.setRefDistance(30);
     localAudioBustle.setVolume(2);
     localAudioBustle.play();
   });
@@ -151,44 +135,15 @@ function addSpatialAudio() {
   scene.add(bustleAudioGroup);
 }
 
-//add ambient light
-let ambientLight = new THREE.AmbientLight("rgb(242, 237, 222)", 0.8);
+//add ambient light 242, 237, 222
+let ambientLight = new THREE.AmbientLight("rgb(57,80,10)", 0.8);
 ambientLight.castShadow = true;
 scene.add(ambientLight);
-
-// //add a directional light
-// let myDirectionalLight = new THREE.DirectionalLight("rgb(255, 255, 255)", 1);
-// myDirectionalLight.position.set(60, 50, -50);
-// myDirectionalLight.lookAt(0, 0, 0);
-// scene.add(myDirectionalLight);
-// myDirectionalLight.castShadow = true;
-// myDirectionalLight.shadow.mapSize.width = 512; // default
-// myDirectionalLight.shadow.mapSize.height = 512; // default
-// myDirectionalLight.shadow.camera.near = 0.5; // default
-// myDirectionalLight.shadow.camera.far = 500; // default
-// //add directional light helper
-// const myDirectionalLightHelper = new THREE.DirectionalLightHelper( myDirectionalLight, 10 );
-// scene.add( myDirectionalLightHelper );
-
-// //add second directional light
-// let myDirectionalLight2 = new THREE.DirectionalLight("rgb(255, 255, 255)", 0.85);
-// myDirectionalLight2.position.set(30, 100, -0);
-// myDirectionalLight2.lookAt(0, 0, 0);
-// scene.add(myDirectionalLight2);
-// myDirectionalLight2.castShadow = true;
-// myDirectionalLight2.shadow.mapSize.width = 512; // default
-// myDirectionalLight2.shadow.mapSize.height = 600; // default
-// myDirectionalLight2.shadow.camera.near = 0.5; // default
-// myDirectionalLight2.shadow.camera.far = 500; // default
-
-// //add second directional light helper
-// const myDirectionalLightHelper2 = new THREE.DirectionalLightHelper( myDirectionalLight2, 10 );
-// scene.add( myDirectionalLightHelper2 );
 
 let myDirectionalLight = [];
 let myDirectionalLightHelper = [];
 for (let i=0; i<5; i++){
-  myDirectionalLight[i] = new THREE.DirectionalLight("rgb(255, 255, 255)", 1);
+  myDirectionalLight[i] = new THREE.DirectionalLight("rgb(50,50,50)", 1);
   myDirectionalLight[i].position.set((-250+(100*i)), 100, 0);
   myDirectionalLight[i].lookAt((-250+(100*i)), 0, 0);
   scene.add(myDirectionalLight[i]);
@@ -197,20 +152,20 @@ for (let i=0; i<5; i++){
   myDirectionalLight[i].shadow.mapSize.height = 512; // default
   myDirectionalLight[i].shadow.camera.near = 0.5; // default
   myDirectionalLight[i].shadow.camera.far = 500; // default
-  //add directional light helper
-  myDirectionalLightHelper[i] = new THREE.DirectionalLightHelper( myDirectionalLight[i], 10 );
-  scene.add(myDirectionalLightHelper[i]);
+  //add directional light helper, comment out when done
+  // myDirectionalLightHelper[i] = new THREE.DirectionalLightHelper( myDirectionalLight[i], 10 );
+  // scene.add(myDirectionalLightHelper[i]);
 };
 
-// 3d model
 let my3DModel = new THREE.Group();
 my3DModel.position.set(0,0,0);
 let loader = new GLTFLoader();
-loader.load( './pro_line_contemporary_sliding_door_new.glb',
+loader.load( './la_night_city.glb',
  ( object ) => {
   console.log(object)
-  object.scene.scale.set(0.2,0.2,0.2);
-  object.scene.position.set(50,0,-100);
+  object.scene.scale.set(30,30,30);
+  object.scene.position.set(50,0,-400);
+  object.scene.rotateY(120);
   object.scene.receiveShadow = true;
   object.scene.castShadow = true;
   object.scene.rotateY(1.43);
@@ -218,15 +173,28 @@ loader.load( './pro_line_contemporary_sliding_door_new.glb',
 	scene.add(my3DModel);
 });
 
+let waterModel = new THREE.Group();
+waterModel.position.set(0,0,0);
+loader.load( './water_waves.glb',
+ ( object ) => {
+  console.log(object)
+  object.scene.scale.set(1,1,1);
+  object.scene.position.set(0,0,0);
+  object.scene.rotateY(120);
+  object.scene.receiveShadow = true;
+  object.scene.castShadow = true;
+  object.scene.rotateY(1.43);
+  waterModel.add(object.scene);
+	scene.add(waterModel);
+});
 
-//fog
-let fogGroup = new THREE.Group();
-fogGroup.position.set(0,0,0);
 
 function loop() {
   //rotate for vertigo effect
   // floorMesh.rotateY(0.001);
   // floorMesh.rotateX(0.001);
+  waterModel.rotateX(0.0001);
+  waterModel.rotateY(0.0001);
   // finally, take a picture of the scene and show it in the <canvas>
   renderer.render(scene, camera);
 
@@ -234,5 +202,6 @@ function loop() {
 }
 loop();
 addSpatialAudio();
+
 
 
